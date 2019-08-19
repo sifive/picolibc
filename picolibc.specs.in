@@ -1,11 +1,18 @@
-%rename link	picolibc_link
-%rename cpp	picolibc_cpp
+%rename link    picolibc_link
+%rename link_gcc_c_sequence     picolibc_link_gcc_c_sequence
+%rename cpp     picolibc_cpp
 
 *cpp:
--isystem @INCLUDEDIR@ %(picolibc_cpp)
+-isystem =/include/picolibc %(picolibc_cpp)
+
+*picolibc_libc:
+-lc_pico
+
+*picolibc_libgloss:
+%{specs=nosys.specs:-lnosys} %{!specs=nosys.specs:-lgloss_nano}
+
+*link_gcc_c_sequence:
+--start-group %(picolibc_libc) %(picolibc_libgloss) %(libgcc) --end-group
 
 *link:
--L@LIBDIR@/%M %(picolibc_link)
-
-*lib:
---start-group -lc --end-group 
+%(picolibc_link) %:replace-outfile(-lc -lc_pico) %:replace-outfile(-lm -lm_pico)
